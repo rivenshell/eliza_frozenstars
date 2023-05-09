@@ -20,8 +20,33 @@ const scene = new THREE.Scene()
 const textureLoader = new THREE.TextureLoader()
 
 /**
- * Test cube
+ *particles
  */
+
+// Geometry
+const particlesGeometry = new THREE.BufferGeometry(1, 32, 32)
+const count = 500
+
+const positions = new Float32Array(count * 3)
+
+for (let i = 0; i < count * 3; i++) {
+  positions[i] = (Math.random() - 0.5) * 10
+}
+
+particlesGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(positions, 3)
+)
+
+// Material
+const particlesMaterial = new THREE.PointsMaterial({
+  size: 0.02,
+  sizeAttenuation: true,
+})
+
+// Points
+const particles = new THREE.Points(particlesGeometry, particlesMaterial)
+scene.add(particles)
 
 /**
  * Sizes
@@ -57,6 +82,46 @@ const camera = new THREE.PerspectiveCamera(
 )
 camera.position.z = 3
 scene.add(camera)
+
+//Audio
+const listener = new THREE.AudioListener()
+camera.add(listener)
+//audio source
+const sound = new THREE.Audio(listener)
+//audio loader
+console.log(listener)
+const audioLoader = new THREE.AudioLoader()
+audioLoader.load("./audio/eliza.mp3", function (buffer) {
+  sound.setBuffer(buffer)
+  sound.setLoop(true)
+  sound.setVolume(0.5)
+  sound.play()
+})
+
+//add audio controls
+const audioControls = {
+  volume: 0.5,
+  play: true,
+  pause: false,
+  stop: false,
+}
+
+gui
+  .add(audioControls, "volume")
+  .min(0)
+  .max(1)
+  .step(0.01)
+  .onChange(() => {
+    sound.setVolume(audioControls.volume)
+  })
+
+gui.add(audioControls, "play").onChange(() => {
+  sound.play()
+})
+
+gui.add(audioControls, "pause").onChange(() => {
+  sound.pause()
+})
 
 // Controls
 const controls = new OrbitControls(camera, canvas)
